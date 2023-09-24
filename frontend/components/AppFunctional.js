@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 // önerilen başlangıç stateleri
@@ -9,17 +10,20 @@ import React, { useEffect, useState } from "react";
 export default function AppFunctional(props) {
   const kareler = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   const koordinatlar = [
-    "(1, 1)",
-    "(2, 1)",
-    "(3, 1)",
-    "(1, 2)",
-    "(2, 2)",
-    "(3, 2)",
-    "(1, 3)",
-    "(2, 3)",
-    "(3, 3)",
+    { x: 1, y: 1 },
+    { x: 2, y: 1 },
+    { x: 3, y: 1 },
+    { x: 1, y: 2 },
+    { x: 2, y: 2 },
+    { x: 3, y: 2 },
+    { x: 1, y: 3 },
+    { x: 2, y: 3 },
+    { x: 3, y: 3 },
   ];
-  const [coordinate, setCoordinate] = useState("(2, 2)");
+  const [coordinate, setCoordinate] = useState({
+    x: koordinatlar[4].x,
+    y: koordinatlar[4].y,
+  });
   const [index, setIndex] = useState(4);
   const [steps, setSteps] = useState(0);
   const [email, setEmail] = useState("");
@@ -32,7 +36,11 @@ export default function AppFunctional(props) {
     // Bunları hesaplayabilmek için "B" nin hangi indexte olduğunu bilmek yeterlidir.
     for (let i = 0; i < kareler.length; i++) {
       if (kareler[i] == index) {
-        setCoordinate(koordinatlar[i]);
+        setCoordinate({
+          ...coordinate,
+          x: koordinatlar[i].x,
+          y: koordinatlar[i].y,
+        });
       }
     }
   }
@@ -101,18 +109,35 @@ export default function AppFunctional(props) {
     sonrakiIndex(evt.target.id);
   }
 
-  function onChange(evt) {
+  function changeHandler(evt) {
     // inputun değerini güncellemek için bunu kullanabilirsiniz
+    setEmail(evt.target.value);
   }
 
-  function onSubmit(evt) {
+  function submitHandler(evt) {
     // payloadu POST etmek için bir submit handlera da ihtiyacınız var.
+    evt.preventDefault();
+    const payLoad = {
+      x: coordinate.x,
+      y: coordinate.y,
+      steps: steps,
+      email: email,
+    };
+    axios
+      .post("http://localhost:9000/api/result", payLoad)
+      .then((res) => setMessage(res.data.message));
+
+    setIndex(4);
+    document.getElementById("email").value = "";
+    setSteps(0);
   }
 
   return (
     <div id="wrapper" className={props.className}>
       <div className="info">
-        <h3 id="coordinates">Koordinatlar {coordinate}</h3>
+        <h3 id="coordinates">
+          Koordinatlar {`(${coordinate.x}, ${coordinate.y})`}
+        </h3>
         <h3 id="steps">{steps} kere ilerlediniz</h3>
       </div>
       <div id="grid">
@@ -145,8 +170,13 @@ export default function AppFunctional(props) {
           reset
         </button>
       </div>
-      <form>
-        <input id="email" type="email" placeholder="email girin"></input>
+      <form onSubmit={submitHandler}>
+        <input
+          id="email"
+          type="email"
+          placeholder="email girin"
+          onChange={changeHandler}
+        ></input>
         <input id="submit" type="submit"></input>
       </form>
     </div>
