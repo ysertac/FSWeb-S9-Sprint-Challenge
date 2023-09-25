@@ -60,6 +60,7 @@ export default function AppFunctional(props) {
     setIndex(4);
     setSteps(0);
     setMessage("");
+    setEmail("");
   }
 
   function sonrakiIndex(yon) {
@@ -68,7 +69,7 @@ export default function AppFunctional(props) {
     // şu anki indeksi değiştirmemeli.
     if (yon == "left") {
       if (index == 0 || index == 3 || index == 6) {
-        setMessage(`You can't go ${yon}`);
+        setMessage(`Sola gidemezsiniz`);
       } else {
         setIndex(index - 1);
         setSteps(steps + 1);
@@ -76,7 +77,7 @@ export default function AppFunctional(props) {
       }
     } else if (yon == "right") {
       if (index == 2 || index == 5 || index == 8) {
-        setMessage(`You can't go ${yon}`);
+        setMessage(`Sağa gidemezsiniz`);
       } else {
         setIndex(index + 1);
         setSteps(steps + 1);
@@ -84,7 +85,7 @@ export default function AppFunctional(props) {
       }
     } else if (yon == "up") {
       if (index == 0 || index == 1 || index == 2) {
-        setMessage(`You can't go ${yon}`);
+        setMessage(`Yukarıya gidemezsiniz`);
       } else {
         setIndex(index - 3);
         setSteps(steps + 1);
@@ -92,7 +93,7 @@ export default function AppFunctional(props) {
       }
     } else if (yon == "down") {
       if (index == 6 || index == 7 || index == 8) {
-        setMessage(`You can't go ${yon}`);
+        setMessage(`Aşağıya gidemezsiniz`);
       } else {
         setIndex(index + 3);
         setSteps(steps + 1);
@@ -125,11 +126,13 @@ export default function AppFunctional(props) {
     };
     axios
       .post("http://localhost:9000/api/result", payLoad)
-      .then((res) => setMessage(res.data.message));
-
-    setIndex(4);
-    document.getElementById("email").value = "";
-    setSteps(0);
+      .then((res) => {
+        setMessage(res.data.message);
+        setEmail("");
+      })
+      .catch((err) => {
+        setMessage(err.response.data.message);
+      });
   }
 
   return (
@@ -176,6 +179,7 @@ export default function AppFunctional(props) {
           type="email"
           placeholder="email girin"
           onChange={changeHandler}
+          value={email}
         ></input>
         <input id="submit" type="submit"></input>
       </form>
